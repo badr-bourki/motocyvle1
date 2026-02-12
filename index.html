@@ -4,782 +4,1036 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CYCLISTE | Elite Superbikes</title>
-    
-    <!-- External CSS -->
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- AOS Library -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --red: #dc2626;
+            --red-dark: #b91c1c;
+            --black: #000;
+            --zinc-950: #09090b;
+            --zinc-900: #18181b;
+            --white: #fff;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* ── LOADER ── */
+        .loader {
+            position: fixed; inset: 0;
+            background: #000;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+        .loader.hidden { opacity: 0; visibility: hidden; }
+        .loader-icon {
+            width: 48px; height: 48px;
+            border: 3px solid #333;
+            border-top-color: var(--red);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── NAVBAR ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 20px 48px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.3s;
+        }
+        nav.scrolled { background: rgba(0,0,0,0.92); backdrop-filter: blur(12px); }
+
+        .nav-logo {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.5rem; font-weight: 700; color: #fff;
+            text-decoration: none;
+        }
+        .nav-logo span { color: var(--red); }
+
+        .nav-links { display: flex; gap: 48px; list-style: none; }
+        .nav-links a {
+            font-size: 0.7rem; font-weight: 500;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: #fff; text-decoration: none;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--red); }
+
+        .btn-join {
+            background: var(--red); color: #fff;
+            padding: 12px 32px;
+            font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            border: none; cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-join:hover { background: var(--red-dark); }
+
+        .mobile-toggle {
+            display: none; background: none; border: none;
+            color: #fff; cursor: pointer;
+        }
+
+        /* Mobile menu */
+        .mobile-menu {
+            position: fixed; top: 0; right: -280px;
+            width: 260px; height: 100%;
+            background: rgba(0,0,0,0.97); backdrop-filter: blur(16px);
+            z-index: 200;
+            padding: 80px 32px 32px;
+            transition: right 0.35s ease;
+        }
+        .mobile-menu.open { right: 0; }
+        .mobile-menu a {
+            display: block; padding: 16px 0;
+            font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;
+            color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.07);
+            transition: color 0.3s;
+        }
+        .mobile-menu a:hover { color: var(--red); }
+        .close-btn {
+            position: absolute; top: 24px; right: 24px;
+            background: none; border: none; color: #fff; cursor: pointer;
+        }
+
+        @media (max-width: 1024px) {
+            .nav-links, .btn-join { display: none; }
+            .mobile-toggle { display: block; }
+            nav { padding: 20px 24px; }
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            background: #000 url('https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+            display: flex; align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 60%, rgba(220,38,38,0.15) 100%);
+        }
+        .hero-content {
+            position: relative; z-index: 2;
+            max-width: 1280px; margin: 0 auto; padding: 0 48px;
+        }
+        .hero-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 7rem);
+            font-weight: 700; line-height: 1;
+            text-transform: uppercase;
+            margin-bottom: 32px;
+        }
+        .hero-title .highlight { color: var(--red); display: block; }
+        .hero-sub {
+            font-size: 1.1rem; color: rgba(255,255,255,0.7);
+            max-width: 560px; line-height: 1.7; margin-bottom: 48px;
+        }
+        .cta-btn {
+            display: inline-block;
+            background: var(--red); color: #fff;
+            padding: 18px 56px;
+            font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            text-decoration: none;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .cta-btn:hover { background: var(--red-dark); transform: translateY(-2px); }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute; bottom: 32px; left: 50%;
+            transform: translateX(-50%);
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            font-size: 0.6rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.4);
+        }
+        .scroll-indicator::after {
+            content: '';
+            width: 1px; height: 48px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent);
+            animation: scrollDown 1.5s ease infinite;
+        }
+        @keyframes scrollDown {
+            0% { transform: scaleY(0); transform-origin: top; }
+            50% { transform: scaleY(1); transform-origin: top; }
+            51% { transform: scaleY(1); transform-origin: bottom; }
+            100% { transform: scaleY(0); transform-origin: bottom; }
+        }
+
+        /* ── STATS ── */
+        .stats { padding: 80px 48px; background: linear-gradient(to bottom, #000, #09090b); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .stats-grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(4,1fr); gap: 32px; text-align: center; }
+        .stat-num { font-family: 'Syncopate', sans-serif; font-size: 3rem; font-weight: 700; color: var(--red); }
+        .stat-label { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: #6b7280; margin-top: 8px; }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2,1fr); }
+            .hero-content { padding: 0 24px; }
+            .stats { padding: 60px 24px; }
+        }
+
+        /* ── CATEGORIES ── */
+        .section { padding: 128px 48px; background: #000; }
+        .section-inner { max-width: 1280px; margin: 0 auto; }
+        .section-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: clamp(2rem, 5vw, 4rem); font-weight: 700;
+            text-transform: uppercase; text-align: center; margin-bottom: 16px;
+        }
+        .section-title .accent { color: var(--red); }
+        .section-sub { text-align: center; color: #6b7280; max-width: 560px; margin: 0 auto 64px; }
+
+        /* Filter Pills */
+        .filter-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 64px; }
+        .pill {
+            padding: 10px 28px;
+            font-size: 0.65rem; font-weight: 600;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            border: none; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .pill.active { background: var(--red); color: #fff; }
+        .pill:not(.active) { background: #18181b; color: #fff; }
+        .pill:not(.active):hover { background: var(--red); color: #fff; }
+
+        /* Bike Grid */
+        .bike-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; }
+        @media (max-width: 1024px) { .bike-grid { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 640px) { .bike-grid { grid-template-columns: 1fr; } .section { padding: 80px 24px; } }
+
+        .bike-card {
+            background: #09090b;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow: hidden;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .bike-card:hover { transform: translateY(-6px); border-color: rgba(220,38,38,0.3); }
+        .bike-card:not(.visible) { display: none; }
+        .bike-card.visible { display: block; }
+
+        .bike-img-wrap { position: relative; overflow: hidden; height: 280px; }
+        .bike-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .bike-card:hover .bike-img-wrap img { transform: scale(1.05); }
+        .badge {
+            position: absolute; top: 16px; left: 16px;
+            background: var(--red); color: #fff;
+            padding: 4px 12px; font-size: 0.6rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+        }
+
+        .bike-body { padding: 32px; }
+        .bike-cat { color: var(--red); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+        .bike-name { font-family: 'Syncopate', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 16px; }
+        .bike-desc { color: #6b7280; font-size: 0.875rem; line-height: 1.6; margin-bottom: 24px; }
+
+        .specs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 24px; }
+        .spec-label { font-size: 0.6rem; text-transform: uppercase; color: #6b7280; margin-bottom: 4px; }
+        .spec-val { font-weight: 700; font-size: 0.95rem; }
+
+        .bike-price { font-family: 'Syncopate', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--red); margin-bottom: 24px; }
+        .btn-specs {
+            display: block; width: 100%; padding: 16px;
+            background: #fff; color: #000;
+            font-size: 0.65rem; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            border: none; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-specs:hover { background: var(--red); color: #fff; }
+
+        /* ── VIDEO GALLERY ── */
+        .video-section { padding: 128px 48px; background: linear-gradient(to bottom, #000, #09090b, #000); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .video-grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+        @media (max-width: 1024px) { .video-grid { grid-template-columns: 1fr; } .video-section { padding: 80px 24px; } }
+
+        .video-item h3 { font-family: 'Syncopate', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; }
+        .video-item h3 .accent { color: var(--red); }
+        .video-item:nth-child(even) { margin-top: 80px; }
+        @media (max-width: 1024px) { .video-item:nth-child(even) { margin-top: 0; } }
+
+        .video-wrap { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; background: #09090b; }
+        .video-wrap iframe, .video-wrap video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+        /* Placeholder for missing videos */
+        .video-placeholder {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #09090b, #18181b);
+            gap: 16px;
+        }
+        .video-placeholder svg { color: var(--red); }
+        .video-placeholder p { font-size: 0.7rem; letter-spacing: 0.1em; color: #6b7280; }
+
+        .video-meta { display: flex; gap: 24px; margin-top: 16px; }
+        .video-meta span { font-size: 0.8rem; color: #6b7280; display: flex; align-items: center; gap: 6px; }
+        .video-meta svg { color: var(--red); width: 16px; height: 16px; }
+        .video-desc { color: #6b7280; font-size: 0.875rem; line-height: 1.7; margin-top: 16px; }
+
+        /* ── ABOUT ── */
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+        @media (max-width: 1024px) { .about-grid { grid-template-columns: 1fr; } }
+
+        .about-title { font-family: 'Syncopate', sans-serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; text-transform: uppercase; margin-bottom: 32px; }
+        .about-p { color: #d1d5db; line-height: 1.8; margin-bottom: 16px; }
+        .about-p + .about-p { color: #9ca3af; }
+
+        .feature-list { margin-top: 32px; display: flex; flex-direction: column; gap: 20px; }
+        .feature-item { display: flex; gap: 16px; align-items: flex-start; }
+        .feature-icon { background: var(--red); padding: 10px; flex-shrink: 0; margin-top: 2px; }
+        .feature-icon svg { width: 20px; height: 20px; }
+        .feature-title { font-weight: 700; margin-bottom: 4px; }
+        .feature-desc { font-size: 0.875rem; color: #6b7280; }
+
+        .about-img-wrap { position: relative; }
+        .about-img { width: 100%; display: block; }
+        .about-img-border { position: absolute; bottom: -40px; right: -40px; width: 100%; height: 100%; border: 2px solid rgba(220,38,38,0.3); pointer-events: none; }
+
+        .quote-block { margin-top: 128px; max-width: 900px; margin-left: auto; margin-right: auto; text-align: center; }
+        .quote-line { border-top: 1px solid rgba(220,38,38,0.3); border-bottom: 1px solid rgba(220,38,38,0.3); padding: 48px 32px; }
+        .quote-text { font-size: clamp(1.1rem, 2.5vw, 1.5rem); font-style: italic; font-weight: 300; color: #d1d5db; line-height: 1.7; }
+        .quote-author { color: var(--red); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 24px; }
+
+        /* ── CONTACT ── */
+        .contact-section { padding: 128px 48px; background: linear-gradient(to bottom, #000, #09090b); }
+        .contact-grid { max-width: 1280px; margin: 64px auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
+        @media (max-width: 1024px) { .contact-grid { grid-template-columns: 1fr; } .contact-section { padding: 80px 24px; } }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #9ca3af; margin-bottom: 8px; }
+        .form-input, .form-select, .form-textarea {
+            width: 100%; padding: 14px 16px;
+            background: #18181b; color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Inter', sans-serif; font-size: 0.9rem;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--red); }
+        .form-textarea { height: 130px; resize: vertical; }
+        .form-select option { background: #18181b; }
+        .form-input::placeholder, .form-textarea::placeholder { color: #4b5563; }
+
+        .btn-submit {
+            width: 100%; padding: 18px;
+            background: var(--red); color: #fff;
+            font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            border: none; cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .btn-submit:hover { background: var(--red-dark); transform: translateY(-1px); }
+
+        .contact-info-title { font-family: 'Syncopate', sans-serif; font-size: 1.3rem; font-weight: 700; text-transform: uppercase; margin-bottom: 32px; }
+        .info-list { display: flex; flex-direction: column; gap: 24px; }
+        .info-item { display: flex; gap: 16px; align-items: flex-start; }
+        .info-icon { background: var(--red); padding: 14px; flex-shrink: 0; }
+        .info-icon svg { width: 20px; height: 20px; }
+        .info-item h4 { font-weight: 700; margin-bottom: 4px; }
+        .info-item p { font-size: 0.875rem; color: #9ca3af; line-height: 1.7; }
+
+        .map-wrap { margin-top: 32px; height: 240px; background: #18181b; border: 1px solid rgba(255,255,255,0.07); overflow: hidden; }
+        .map-wrap iframe { width: 100%; height: 100%; border: 0; }
+
+        /* ── FOOTER ── */
+        footer { padding: 80px 48px 40px; border-top: 1px solid rgba(255,255,255,0.05); background: #000; }
+        .footer-grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px; margin-bottom: 64px; }
+        @media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr; } footer { padding: 60px 24px 32px; } }
+
+        .footer-logo { font-family: 'Syncopate', sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 24px; }
+        .footer-logo span { color: var(--red); }
+        .footer-desc { color: #6b7280; line-height: 1.7; margin-bottom: 24px; }
+
+        .social-links { display: flex; gap: 12px; }
+        .social-link {
+            width: 44px; height: 44px;
+            background: #18181b; display: flex; align-items: center; justify-content: center;
+            transition: background 0.3s;
+            text-decoration: none; color: #fff;
+        }
+        .social-link:hover { background: var(--red); }
+        .social-link svg { width: 18px; height: 18px; }
+
+        .footer-heading { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 24px; }
+        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+        .footer-links a { font-size: 0.875rem; color: #6b7280; text-decoration: none; transition: color 0.3s; }
+        .footer-links a:hover { color: var(--red); }
+
+        .footer-bottom { max-width: 1280px; margin: 0 auto; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.07); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 0.75rem; color: #6b7280; }
+        .footer-legal { display: flex; gap: 24px; }
+        .footer-legal a { color: #6b7280; text-decoration: none; transition: color 0.3s; }
+        .footer-legal a:hover { color: #fff; }
+
+        /* ── BACK TO TOP ── */
+        #back-top {
+            position: fixed; bottom: 32px; right: 32px;
+            background: var(--red); color: #fff;
+            width: 52px; height: 52px;
+            display: flex; align-items: center; justify-content: center;
+            border: none; cursor: pointer;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s;
+            z-index: 50;
+        }
+        #back-top.show { opacity: 1; visibility: visible; }
+        #back-top:hover { background: var(--red-dark); }
+        #back-top svg { width: 22px; height: 22px; }
+
+        /* ── ANIMATIONS ── */
+        [data-reveal] { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        [data-reveal].revealed { opacity: 1; transform: none; }
+        [data-reveal-left] { opacity: 0; transform: translateX(-40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        [data-reveal-left].revealed { opacity: 1; transform: none; }
+        [data-reveal-right] { opacity: 0; transform: translateX(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        [data-reveal-right].revealed { opacity: 1; transform: none; }
+
+        /* Success message */
+        .form-success { display: none; padding: 16px; background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: var(--red); font-size: 0.875rem; margin-top: 16px; text-align: center; letter-spacing: 0.05em; }
+        .form-success.show { display: block; }
+    </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div class="loader" id="loader">
-        <div class="loader-icon"></div>
-    </div>
 
-    <!-- Particles Background -->
-    <div id="particles-js"></div>
+<!-- LOADER -->
+<div class="loader" id="loader">
+    <div class="loader-icon"></div>
+</div>
 
-    <!-- Navigation -->
-    <nav class="fixed w-full z-50 px-6 md:px-12 py-5 flex justify-between items-center border-b border-white/5" id="navbar">
-        <div class="text-2xl md:text-3xl font-bold font-heading text-white">
-            CYCLISTE<span class="text-red-600">.</span>
-        </div>
-        
-        <!-- Desktop Menu -->
-        <div class="hidden lg:flex space-x-12 font-medium uppercase text-xs tracking-[0.2em]">
-            <a href="#home" class="hover:text-red-600 transition-colors duration-300">Home</a>
-            <a href="#categories" class="hover:text-red-600 transition-colors duration-300">Categories</a>
-            <a href="#about" class="hover:text-red-600 transition-colors duration-300">About</a>
-            <a href="#contact" class="hover:text-red-600 transition-colors duration-300">Contact</a>
-        </div>
-        
-        <div class="flex items-center space-x-4">
-            <button class="btn-primary bg-red-600 hover:bg-red-700 text-white px-8 py-3 text-xs font-bold uppercase tracking-[0.15em] transition-all duration-300">
-                Join Club
-            </button>
-            
-            <!-- Mobile Menu Button -->
-            <button class="lg:hidden text-white" id="mobile-menu-btn">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-        </div>
-    </nav>
+<!-- NAVBAR -->
+<nav id="navbar">
+    <a href="#home" class="nav-logo">CYCLISTE<span>.</span></a>
 
-    <!-- Mobile Menu -->
-    <div class="mobile-menu fixed top-0 right-0 h-full w-64 bg-black/95 backdrop-blur-xl z-50 p-8 lg:hidden" id="mobile-menu">
-        <button class="absolute top-6 right-6 text-white" id="close-menu">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#categories">Categories</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
+
+    <div style="display:flex;align-items:center;gap:16px;">
+        <button class="btn-join">Join Club</button>
+        <button class="mobile-toggle" id="menu-toggle" aria-label="Menu">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
         </button>
-        <div class="flex flex-col space-y-8 mt-16 uppercase text-sm tracking-[0.2em]">
-            <a href="#home" class="hover:text-red-600 transition">Home</a>
-            <a href="#categories" class="hover:text-red-600 transition">Categories</a>
-            <a href="#about" class="hover:text-red-600 transition">About</a>
-            <a href="#contact" class="hover:text-red-600 transition">Contact</a>
+    </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobile-menu">
+    <button class="close-btn" id="menu-close" aria-label="Close">
+        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </button>
+    <a href="#home">Home</a>
+    <a href="#categories">Categories</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            IGNITE YOUR<br>
+            <span class="highlight">SOUL</span>
+            CYCLISTE
+        </h1>
+        <p class="hero-sub">Experience the ultimate thrill of the ride. Where passion meets precision, and every journey becomes a legend on two wheels.</p>
+        <a href="#categories" class="cta-btn">EXPLORE NOW</a>
+    </div>
+    <div class="scroll-indicator">SCROLL</div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+    <div class="stats-grid">
+        <div data-reveal>
+            <div class="stat-num">500+</div>
+            <div class="stat-label">Premium Bikes</div>
+        </div>
+        <div data-reveal style="transition-delay:0.1s">
+            <div class="stat-num">15K+</div>
+            <div class="stat-label">Happy Riders</div>
+        </div>
+        <div data-reveal style="transition-delay:0.2s">
+            <div class="stat-num">25+</div>
+            <div class="stat-label">Top Brands</div>
+        </div>
+        <div data-reveal style="transition-delay:0.3s">
+            <div class="stat-num">350</div>
+            <div class="stat-label">Max Speed KM/H</div>
+        </div>
+    </div>
+</section>
+
+<!-- CATEGORIES -->
+<section id="categories" class="section">
+    <div class="section-inner">
+        <h2 class="section-title" data-reveal>BIKE <span class="accent">CATEGORIES</span></h2>
+        <p class="section-sub" data-reveal>Choose your weapon. Each category designed for different thrills.</p>
+
+        <div class="filter-bar" data-reveal>
+            <button class="pill active" data-cat="all">All Bikes</button>
+            <button class="pill" data-cat="supercycle">Supercycle</button>
+            <button class="pill" data-cat="hyperbike">Hyperbike</button>
+            <button class="pill" data-cat="beast">German Beast</button>
+        </div>
+
+        <div class="bike-grid" id="bike-grid">
+
+            <!-- Card 1 -->
+            <div class="bike-card visible" data-cat="supercycle" data-reveal>
+                <div class="bike-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?q=80&w=2070&auto=format&fit=crop" alt="Ducati Panigale V4" loading="lazy">
+                    <span class="badge">Featured</span>
+                </div>
+                <div class="bike-body">
+                    <div class="bike-cat">Supercycle</div>
+                    <h3 class="bike-name">DUCATI PANIGALE V4</h3>
+                    <p class="bike-desc">The pinnacle of Italian engineering. Raw power meets precision handling.</p>
+                    <div class="specs-grid">
+                        <div><div class="spec-label">Engine</div><div class="spec-val">1103cc V4</div></div>
+                        <div><div class="spec-label">Power</div><div class="spec-val">214 HP</div></div>
+                        <div><div class="spec-label">Weight</div><div class="spec-val">195 kg</div></div>
+                        <div><div class="spec-label">Top Speed</div><div class="spec-val">300 km/h</div></div>
+                    </div>
+                    <div class="bike-price">$24,495</div>
+                    <button class="btn-specs">View Full Specs</button>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bike-card visible" data-cat="hyperbike" data-reveal style="transition-delay:0.1s">
+                <div class="bike-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?q=80&w=2070&auto=format&fit=crop" alt="Kawasaki Ninja H2R" loading="lazy">
+                    <span class="badge">Track Only</span>
+                </div>
+                <div class="bike-body">
+                    <div class="bike-cat">Hyperbike</div>
+                    <h3 class="bike-name">KAWASAKI NINJA H2R</h3>
+                    <p class="bike-desc">Supercharged beast. The fastest production motorcycle ever built.</p>
+                    <div class="specs-grid">
+                        <div><div class="spec-label">Engine</div><div class="spec-val">998cc I4</div></div>
+                        <div><div class="spec-label">Power</div><div class="spec-val">310 HP</div></div>
+                        <div><div class="spec-label">Weight</div><div class="spec-val">216 kg</div></div>
+                        <div><div class="spec-label">Top Speed</div><div class="spec-val">400 km/h</div></div>
+                    </div>
+                    <div class="bike-price">$57,000</div>
+                    <button class="btn-specs">View Full Specs</button>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="bike-card visible" data-cat="beast" data-reveal style="transition-delay:0.2s">
+                <div class="bike-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?q=80&w=2070&auto=format&fit=crop" alt="BMW S1000RR" loading="lazy">
+                    <span class="badge">Best Seller</span>
+                </div>
+                <div class="bike-body">
+                    <div class="bike-cat">German Beast</div>
+                    <h3 class="bike-name">BMW S1000RR</h3>
+                    <p class="bike-desc">German precision engineering. Perfect balance of power and control.</p>
+                    <div class="specs-grid">
+                        <div><div class="spec-label">Engine</div><div class="spec-val">999cc I4</div></div>
+                        <div><div class="spec-label">Power</div><div class="spec-val">205 HP</div></div>
+                        <div><div class="spec-label">Weight</div><div class="spec-val">197 kg</div></div>
+                        <div><div class="spec-label">Top Speed</div><div class="spec-val">299 km/h</div></div>
+                    </div>
+                    <div class="bike-price">$18,295</div>
+                    <button class="btn-specs">View Full Specs</button>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="bike-card visible" data-cat="supercycle" data-reveal>
+                <div class="bike-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop" alt="Yamaha R1M" loading="lazy">
+                </div>
+                <div class="bike-body">
+                    <div class="bike-cat">Supercycle</div>
+                    <h3 class="bike-name">YAMAHA YZF-R1M</h3>
+                    <p class="bike-desc">MotoGP technology for the streets. Electronic excellence.</p>
+                    <div class="specs-grid">
+                        <div><div class="spec-label">Engine</div><div class="spec-val">998cc I4</div></div>
+                        <div><div class="spec-label">Power</div><div class="spec-val">200 HP</div></div>
+                        <div><div class="spec-label">Weight</div><div class="spec-val">199 kg</div></div>
+                        <div><div class="spec-label">Top Speed</div><div class="spec-val">299 km/h</div></div>
+                    </div>
+                    <div class="bike-price">$26,299</div>
+                    <button class="btn-specs">View Full Specs</button>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="bike-card visible" data-cat="supercycle" data-reveal style="transition-delay:0.1s">
+                <div class="bike-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?q=80&w=2070&auto=format&fit=crop" alt="Honda CBR1000RR" loading="lazy">
+                </div>
+                <div class="bike-body">
+                    <div class="bike-cat">Supercycle</div>
+                    <h3 class="bike-name">HONDA CBR1000RR-R</h3>
+                    <p class="bike-desc">Legendary performance. Honda's most powerful superbike.</p>
+                    <div class="specs-grid">
+                        <div><div class="spec-label">Engine</div><div class="spec-val">999cc I4</div></div>
+                        <div><div class="spec-label">Power</div><div class="spec-val">217 HP</div></div>
+                        <div><div class="spec-label">Weight</div><div class="spec-val">201 kg</div></div>
+                        <div><div class="spec-label">Top Speed</div><div class="spec-val">299 km/h</div></div>
+                    </div>
+                    <div class="bike-price">$28,500</div>
+                    <button class="btn-specs">View Full Specs</button>
+                </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="bike-card visible" data-cat="hyperbike" data-reveal style="transition-delay:0.2s">
+                <div class="bike-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?q=80&w=2070&auto=format&fit=crop" alt="Aprilia RSV4" loading="lazy">
+                </div>
+                <div class="bike-body">
+                    <div class="bike-cat">Hyperbike</div>
+                    <h3 class="bike-name">APRILIA RSV4 1100</h3>
+                    <p class="bike-desc">Italian racing DNA. V4 symphony of pure adrenaline.</p>
+                    <div class="specs-grid">
+                        <div><div class="spec-label">Engine</div><div class="spec-val">1099cc V4</div></div>
+                        <div><div class="spec-label">Power</div><div class="spec-val">217 HP</div></div>
+                        <div><div class="spec-label">Weight</div><div class="spec-val">199 kg</div></div>
+                        <div><div class="spec-label">Top Speed</div><div class="spec-val">305 km/h</div></div>
+                    </div>
+                    <div class="bike-price">$31,499</div>
+                    <button class="btn-specs">View Full Specs</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- VIDEO GALLERY -->
+<section class="video-section" id="videos">
+  <div class="section-inner">
+    <h2 class="section-title" data-reveal>
+      EXPERIENCE <span class="accent">THE THRILL</span>
+    </h2>
+    <p class="section-sub" data-reveal>
+      See these machines in action. Feel the power through your screen.
+    </p>
+
+    <div class="video-grid" style="margin-top:64px;">
+
+      <!-- Video 1 -->
+      <div class="video-item" data-reveal-left>
+        <h3>ENGINE <span class="accent">ROAR</span></h3>
+
+        <div class="video-wrap">
+          <video class="video-player" controls preload="metadata" playsinline>
+            <source src="vid2.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <p class="video-desc">
+          Experience the symphony of engineering excellence. Our bikes are tuned
+          for those who live on the edge and crave the ultimate riding experience.
+        </p>
+
+        <div class="video-meta">
+          <span>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+            </svg>
+            2.5M Views
+          </span>
+          <span>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+            5:42
+          </span>
+        </div>
+      </div>
+
+      <!-- Video 2 -->
+      <div class="video-item" data-reveal-right>
+        <h3>STREET <span class="accent">LEGENDS</span></h3>
+
+        <div class="video-wrap">
+          <video class="video-player" controls preload="metadata" playsinline>
+            <source src="vid1.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <p class="video-desc">
+          From the track to the city nights, CYCLISTE offers the ultimate street-legal
+          performance. Watch how our riders dominate every corner.
+        </p>
+
+        <div class="video-meta">
+          <span>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+            </svg>
+            1.8M Views
+          </span>
+          <span>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+            4:28
+          </span>
+        </div>
+      </div>
+
+      <!-- Video 3 -->
+      <div class="video-item" data-reveal-left>
+        <h3>TRACK <span class="accent">DOMINATION</span></h3>
+
+        <div class="video-wrap">
+          <video class="video-player" controls preload="metadata" playsinline>
+            <source src="vid3.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <p class="video-desc">
+          Watch our superbikes push the limits on the world's most challenging circuits.
+          Pure speed, pure adrenaline.
+        </p>
+
+        <div class="video-meta">
+          <span>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+            </svg>
+            3.2M Views
+          </span>
+          <span>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+            6:15
+          </span>
+        </div>
+      </div>
+
+      <!-- Video 4 -->
+      <div class="video-item" data-reveal-right>
+        <h3>CUSTOM <span class="accent">BUILDS</span></h3>
+
+        <div class="video-wrap">
+          <video class="video-player" controls preload="metadata" playsinline>
+            <source src="vid4.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+
+        <p class="video-desc">
+          See how we transform already incredible machines into personalized masterpieces.
+          Your dream bike, your way.
+        </p>
+
+        <div class="video-meta">
+          <span>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+            </svg>
+            1.5M Views
+          </span>
+          <span>
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+            </svg>
+            8:33
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="section">
+    <div class="section-inner">
+        <div class="about-grid">
+            <div data-reveal-left>
+                <h2 class="about-title">ABOUT <span style="color:var(--red)">CYCLISTE</span></h2>
+                <p class="about-p">Since 2010, CYCLISTE has been the premier destination for elite superbike enthusiasts. We don't just sell motorcycles — we deliver dreams, adrenaline, and the ultimate riding experience.</p>
+                <p class="about-p">Our curated collection features only the world's most exceptional machines, from Italian masterpieces to German engineering marvels. Every bike is hand-selected, meticulously inspected, and backed by our legendary customer service.</p>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div>
+                            <div class="feature-title">Authenticity Guaranteed</div>
+                            <div class="feature-desc">Every bike comes with full documentation and warranty</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div>
+                            <div class="feature-title">Expert Consultation</div>
+                            <div class="feature-desc">Our team of specialists help you find your perfect match</div>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div>
+                            <div class="feature-title">Lifetime Support</div>
+                            <div class="feature-desc">Premium maintenance and customization services</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="about-img-wrap" data-reveal-right>
+                <img class="about-img" src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop" alt="About CYCLISTE">
+                <div class="about-img-border"></div>
+            </div>
+        </div>
+
+        <div class="quote-block" data-reveal>
+            <div class="quote-line">
+                <p class="quote-text">"We believe that riding isn't just transportation — it's a lifestyle, a passion, an art form. Every machine we offer is chosen to ignite that fire within you."</p>
+                <p class="quote-author">— Marcus Chen, Founder & CEO</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section">
+    <div class="section-inner" style="max-width:1280px;margin:0 auto;">
+        <h2 class="section-title" data-reveal>GET IN <span class="accent">TOUCH</span></h2>
+        <p class="section-sub" data-reveal>Ready to own your dream machine? Contact us today and let's make it happen.</p>
+
+        <div class="contact-grid">
+            <div data-reveal-left>
+                <form id="contact-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-input" placeholder="John">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-input" placeholder="Rider">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" placeholder="john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone</label>
+                        <input type="tel" class="form-input" placeholder="+1 (555) 000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Interested In</label>
+                        <select class="form-select form-input">
+                            <option>Select a category</option>
+                            <option>Supercycle</option>
+                            <option>Hyperbike</option>
+                            <option>German Beast</option>
+                            <option>Custom Build</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-textarea form-input" placeholder="Tell us about your dream bike..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-submit">Send Message</button>
+                    <div class="form-success" id="form-success">✓ Message sent! We'll be in touch soon.</div>
+                </form>
+            </div>
+
+            <div data-reveal-right>
+                <h3 class="contact-info-title">VISIT OUR <span style="color:var(--red)">SHOWROOM</span></h3>
+                <div class="info-list">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div>
+                            <h4>Address</h4>
+                            <p>123 Speed Avenue, Motorcycle District<br>Los Angeles, CA 90001, USA</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+                        </div>
+                        <div>
+                            <h4>Phone</h4>
+                            <p>+1 (555) 123-4567<br>+1 (555) 987-6543</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg fill="currentColor" viewBox="0 0 20 20"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+                        </div>
+                        <div>
+                            <h4>Email</h4>
+                            <p>info@cycliste.com<br>sales@cycliste.com</p>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+                        </div>
+                        <div>
+                            <h4>Hours</h4>
+                            <p>Monday – Friday: 9:00 AM – 8:00 PM<br>Saturday: 10:00 AM – 6:00 PM<br>Sunday: Closed</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="map-wrap">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3305.7294!2d-118.2436!3d34.0522!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDAzJzA4LjAiTiAxMTjCsDE0JzM3LjAiVw!5e0!3m2!1sen!2sus!4v1234567890" allowfullscreen loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-grid">
+        <div>
+            <div class="footer-logo">CYCLISTE<span>.</span></div>
+            <p class="footer-desc">The ultimate destination for elite superbike enthusiasts. Experience the thrill, own the power.</p>
+            <div class="social-links">
+                <a href="#" class="social-link" aria-label="Facebook">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </a>
+                <a href="#" class="social-link" aria-label="Instagram">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+                </a>
+                <a href="#" class="social-link" aria-label="YouTube">
+                    <svg fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                </a>
+            </div>
+        </div>
+
+        <div>
+            <h4 class="footer-heading">Quick Links</h4>
+            <ul class="footer-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#categories">Categories</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 class="footer-heading">Services</h4>
+            <ul class="footer-links">
+                <li><a href="#">Bike Sales</a></li>
+                <li><a href="#">Custom Builds</a></li>
+                <li><a href="#">Maintenance</a></li>
+                <li><a href="#">Financing</a></li>
+                <li><a href="#">Trade-ins</a></li>
+                <li><a href="#">Shipping</a></li>
+            </ul>
         </div>
     </div>
 
-    <!-- Hero Section -->
-    <section class="hero" id="home">
-        <div class="hero-content">
-            <h1 class="hero-title">
-                IGNITE YOUR<br>
-                <span class="highlight">SOUL</span>
-                CYCLISTE
-            </h1>
-            <p class="hero-subtitle">
-                Experience the ultimate thrill of the ride. Where passion meets precision, and every journey becomes a legend on two wheels.
-            </p>
-            <a href="#categories" class="cta-button">EXPLORE NOW</a>
+    <div class="footer-bottom">
+        <p>© 2026 CYCLISTE Elite Motors. All rights reserved.</p>
+        <div class="footer-legal">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Cookie Policy</a>
         </div>
-    </section>
+    </div>
+</footer>
 
-    <!-- Stats Section -->
-    <section class="py-20 bg-gradient-to-b from-black to-zinc-950 border-y border-white/5">
-        <div class="max-w-7xl mx-auto px-6 md:px-10">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                <div data-aos="fade-up" data-aos-delay="100">
-                    <div class="stat-number mb-2">500+</div>
-                    <p class="text-gray-400 uppercase text-xs tracking-[0.2em]">Premium Bikes</p>
-                </div>
-                <div data-aos="fade-up" data-aos-delay="200">
-                    <div class="stat-number mb-2">15K+</div>
-                    <p class="text-gray-400 uppercase text-xs tracking-[0.2em]">Happy Riders</p>
-                </div>
-                <div data-aos="fade-up" data-aos-delay="300">
-                    <div class="stat-number mb-2">25+</div>
-                    <p class="text-gray-400 uppercase text-xs tracking-[0.2em]">Top Brands</p>
-                </div>
-                <div data-aos="fade-up" data-aos-delay="400">
-                    <div class="stat-number mb-2">350</div>
-                    <p class="text-gray-400 uppercase text-xs tracking-[0.2em]">Max Speed KM/H</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<!-- BACK TO TOP -->
+<button id="back-top" aria-label="Back to top">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+    </svg>
+</button>
 
-    <!-- Categories Section -->
-    <section id="categories" class="py-32 px-6 md:px-10 bg-black">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16" data-aos="fade-down">
-                <h2 class="text-4xl md:text-6xl font-black font-heading mb-4">
-                    BIKE <span class="text-red-600">CATEGORIES</span>
-                </h2>
-                <p class="text-gray-400 max-w-2xl mx-auto">
-                    Choose your weapon. Each category designed for different thrills.
-                </p>
-            </div>
+<script>
+    // ── LOADER ──
+    window.addEventListener('load', () => {
+        setTimeout(() => document.getElementById('loader').classList.add('hidden'), 600);
+    });
 
-            <!-- Category Filter -->
-            <div class="flex flex-wrap justify-center gap-4 mb-16" data-aos="fade-up">
-                <button class="category-pill active bg-red-600 text-white px-6 py-2 uppercase text-xs tracking-[0.15em] font-semibold" data-category="all">
-                    All Bikes
-                </button>
-                <button class="category-pill bg-zinc-900 text-white px-6 py-2 uppercase text-xs tracking-[0.15em] font-semibold" data-category="supercycle">
-                    Supercycle
-                </button>
-                <button class="category-pill bg-zinc-900 text-white px-6 py-2 uppercase text-xs tracking-[0.15em] font-semibold" data-category="hyperbike">
-                    Hyperbike
-                </button>
-                <button class="category-pill bg-zinc-900 text-white px-6 py-2 uppercase text-xs tracking-[0.15em] font-semibold" data-category="beast">
-                    German Beast
-                </button>
-            </div>
+    // ── NAVBAR SCROLL ──
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
 
-            <!-- Bike Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="bike-container">
-                <!-- Card 1 -->
-                <div class="bike-card bg-zinc-950 overflow-hidden border border-white/5" data-aos="fade-up" data-aos-delay="100" data-category="supercycle">
-                    <div class="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?q=80&w=2070&auto=format&fit=crop" alt="Ducati Panigale V4" class="w-full h-72 object-cover">
-                        <div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                            Featured
-                        </div>
-                    </div>
-                    <div class="p-8 relative z-10">
-                        <div class="text-red-600 font-bold mb-2 text-xs uppercase tracking-[0.15em]">SUPERCYCLE</div>
-                        <h3 class="text-2xl font-bold font-heading mb-4 text-white">DUCATI PANIGALE V4</h3>
-                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
-                            The pinnacle of Italian engineering. Raw power meets precision handling.
-                        </p>
-                        <div class="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-white/10">
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Engine</p>
-                                <p class="text-white font-bold">1103cc V4</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Power</p>
-                                <p class="text-white font-bold">214 HP</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Weight</p>
-                                <p class="text-white font-bold">195 kg</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Top Speed</p>
-                                <p class="text-white font-bold">300 km/h</p>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="text-3xl font-black text-red-600">$24,495</span>
-                        </div>
-                        <button class="w-full py-4 bg-white text-black font-bold uppercase text-xs tracking-[0.15em] hover:bg-red-600 hover:text-white transition-all duration-300">
-                            View Full Specs
-                        </button>
-                    </div>
-                </div>
+    // ── MOBILE MENU ──
+    const mobileMenu = document.getElementById('mobile-menu');
+    document.getElementById('menu-toggle').addEventListener('click', () => mobileMenu.classList.add('open'));
+    document.getElementById('menu-close').addEventListener('click', () => mobileMenu.classList.remove('open'));
+    mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
 
-                <!-- Card 2 -->
-                <div class="bike-card bg-zinc-950 overflow-hidden border border-white/5" data-aos="fade-up" data-aos-delay="200" data-category="hyperbike">
-                    <div class="relative overflow-hidden">
-                        <img src="https://storage.googleapis.com/mhimg/p/6823/5436823/210c_s.jpg" alt="Ninja H2R" class="w-full h-72 object-cover">
-                        <div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                            Track Only
-                        </div>
-                    </div>
-                    <div class="p-8 relative z-10">
-                        <div class="text-red-600 font-bold mb-2 text-xs uppercase tracking-[0.15em]">HYPERBIKE</div>
-                        <h3 class="text-2xl font-bold font-heading mb-4 text-white">KAWASAKI NINJA H2R</h3>
-                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
-                            Supercharged beast. The fastest production motorcycle ever built.
-                        </p>
-                        <div class="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-white/10">
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Engine</p>
-                                <p class="text-white font-bold">998cc I4</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Power</p>
-                                <p class="text-white font-bold">310 HP</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Weight</p>
-                                <p class="text-white font-bold">216 kg</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Top Speed</p>
-                                <p class="text-white font-bold">400 km/h</p>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="text-3xl font-black text-red-600">$57,000</span>
-                        </div>
-                        <button class="w-full py-4 bg-white text-black font-bold uppercase text-xs tracking-[0.15em] hover:bg-red-600 hover:text-white transition-all duration-300">
-                            View Full Specs
-                        </button>
-                    </div>
-                </div>
+    // ── CATEGORY FILTER ──
+    const pills = document.querySelectorAll('.pill');
+    const cards = document.querySelectorAll('.bike-card');
+    pills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            pills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            const cat = pill.dataset.cat;
+            cards.forEach(card => {
+                const show = cat === 'all' || card.dataset.cat === cat;
+                card.classList.toggle('visible', show);
+                card.style.display = show ? 'block' : 'none';
+            });
+        });
+    });
 
-                <!-- Card 3 -->
-                <div class="bike-card bg-zinc-950 overflow-hidden border border-white/5" data-aos="fade-up" data-aos-delay="300" data-category="beast">
-                    <div class="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1599819811279-d5ad9cccf838?q=80&w=2070&auto=format&fit=crop" alt="BMW S1000RR" class="w-full h-72 object-cover">
-                        <div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                            Best Seller
-                        </div>
-                    </div>
-                    <div class="p-8 relative z-10">
-                        <div class="text-red-600 font-bold mb-2 text-xs uppercase tracking-[0.15em]">GERMAN BEAST</div>
-                        <h3 class="text-2xl font-bold font-heading mb-4 text-white">BMW S1000RR</h3>
-                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
-                            German precision engineering. Perfect balance of power and control.
-                        </p>
-                        <div class="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-white/10">
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Engine</p>
-                                <p class="text-white font-bold">999cc I4</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Power</p>
-                                <p class="text-white font-bold">205 HP</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Weight</p>
-                                <p class="text-white font-bold">197 kg</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Top Speed</p>
-                                <p class="text-white font-bold">299 km/h</p>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="text-3xl font-black text-red-600">$18,295</span>
-                        </div>
-                        <button class="w-full py-4 bg-white text-black font-bold uppercase text-xs tracking-[0.15em] hover:bg-red-600 hover:text-white transition-all duration-300">
-                            View Full Specs
-                        </button>
-                    </div>
-                </div>
+    // ── SCROLL REVEAL ──
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('revealed'); });
+    }, { threshold: 0.15 });
 
-                <!-- Card 4 -->
-                <div class="bike-card bg-zinc-950 overflow-hidden border border-white/5" data-aos="fade-up" data-aos-delay="100" data-category="supercycle">
-                    <div class="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop" alt="Yamaha R1M" class="w-full h-72 object-cover">
-                    </div>
-                    <div class="p-8 relative z-10">
-                        <div class="text-red-600 font-bold mb-2 text-xs uppercase tracking-[0.15em]">SUPERCYCLE</div>
-                        <h3 class="text-2xl font-bold font-heading mb-4 text-white">YAMAHA YZF-R1M</h3>
-                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
-                            MotoGP technology for the streets. Electronic excellence.
-                        </p>
-                        <div class="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-white/10">
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Engine</p>
-                                <p class="text-white font-bold">998cc I4</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Power</p>
-                                <p class="text-white font-bold">200 HP</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Weight</p>
-                                <p class="text-white font-bold">199 kg</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Top Speed</p>
-                                <p class="text-white font-bold">299 km/h</p>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="text-3xl font-black text-red-600">$26,299</span>
-                        </div>
-                        <button class="w-full py-4 bg-white text-black font-bold uppercase text-xs tracking-[0.15em] hover:bg-red-600 hover:text-white transition-all duration-300">
-                            View Full Specs
-                        </button>
-                    </div>
-                </div>
+    document.querySelectorAll('[data-reveal],[data-reveal-left],[data-reveal-right]').forEach(el => observer.observe(el));
 
-                <!-- Card 5 -->
-                <div class="bike-card bg-zinc-950 overflow-hidden border border-white/5" data-aos="fade-up" data-aos-delay="200" data-category="supercycle">
-                    <div class="relative overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1609630875171-b1321377ee65?q=80&w=2070&auto=format&fit=crop" alt="Honda CBR1000RR" class="w-full h-72 object-cover">
-                    </div>
-                    <div class="p-8 relative z-10">
-                        <div class="text-red-600 font-bold mb-2 text-xs uppercase tracking-[0.15em]">SUPERCYCLE</div>
-                        <h3 class="text-2xl font-bold font-heading mb-4 text-white">HONDA CBR1000RR-R</h3>
-                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
-                            Legendary performance. Honda's most powerful superbike.
-                        </p>
-                        <div class="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-white/10">
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Engine</p>
-                                <p class="text-white font-bold">999cc I4</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Power</p>
-                                <p class="text-white font-bold">217 HP</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Weight</p>
-                                <p class="text-white font-bold">201 kg</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Top Speed</p>
-                                <p class="text-white font-bold">299 km/h</p>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="text-3xl font-black text-red-600">$28,500</span>
-                        </div>
-                        <button class="w-full py-4 bg-white text-black font-bold uppercase text-xs tracking-[0.15em] hover:bg-red-600 hover:text-white transition-all duration-300">
-                            View Full Specs
-                        </button>
-                    </div>
-                </div>
+    // ── BACK TO TOP ──
+    const backTop = document.getElementById('back-top');
+    window.addEventListener('scroll', () => backTop.classList.toggle('show', window.scrollY > 400));
+    backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-                <!-- Card 6 -->
-                <div class="bike-card bg-zinc-950 overflow-hidden border border-white/5" data-aos="fade-up" data-aos-delay="300" data-category="hyperbike">
-                    <div class="relative overflow-hidden">
-                        <img src="https://www.motorcyclespecs.co.za/Gallery_A-L_16/aprilia-rsv4-factory-21-05.jpg" alt="Aprilia RSV4" class="w-full h-72 object-cover">
-                    </div>
-                    <div class="p-8 relative z-10">
-                        <div class="text-red-600 font-bold mb-2 text-xs uppercase tracking-[0.15em]">HYPERBIKE</div>
-                        <h3 class="text-2xl font-bold font-heading mb-4 text-white">APRILIA RSV4 1100</h3>
-                        <p class="text-gray-400 text-sm mb-6 leading-relaxed">
-                            Italian racing DNA. V4 symphony of pure adrenaline.
-                        </p>
-                        <div class="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-white/10">
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Engine</p>
-                                <p class="text-white font-bold">1099cc V4</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Power</p>
-                                <p class="text-white font-bold">217 HP</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Weight</p>
-                                <p class="text-white font-bold">199 kg</p>
-                            </div>
-                            <div>
-                                <p class="text-gray-500 text-xs uppercase mb-1">Top Speed</p>
-                                <p class="text-white font-bold">305 km/h</p>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center mb-6">
-                            <span class="text-3xl font-black text-red-600">$31,499</span>
-                        </div>
-                        <button class="w-full py-4 bg-white text-black font-bold uppercase text-xs tracking-[0.15em] hover:bg-red-600 hover:text-white transition-all duration-300">
-                            View Full Specs
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Video Gallery Section -->
-    <section class="py-32 bg-gradient-to-b from-black via-zinc-950 to-black border-y border-white/5">
-        <div class="max-w-7xl mx-auto px-6 md:px-10">
-            <div class="text-center mb-16" data-aos="fade-down">
-                <h2 class="text-4xl md:text-6xl font-black font-heading mb-4">
-                    EXPERIENCE <span class="text-red-600">THE THRILL</span>
-                </h2>
-                <p class="text-gray-400 max-w-2xl mx-auto">
-                    See these machines in action. Feel the power through your screen.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <!-- Video 1 -->
-                <div class="space-y-6" data-aos="fade-right">
-                    <h3 class="text-3xl font-bold font-heading">ENGINE <span class="text-red-600">ROAR</span></h3>
-                    <div class="video-container aspect-video w-full overflow-hidden">
-                        <iframe class="w-full h-full" src="vid2.mp4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <p class="text-gray-400 leading-relaxed">
-                        Experience the symphony of engineering excellence. Our bikes are tuned for those who live on the edge and crave the ultimate riding experience.
-                    </p>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-sm text-gray-400">2.5M Views</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-sm text-gray-400">5:42</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Video 2 -->
-                <div class="space-y-6 lg:mt-20" data-aos="fade-left">
-                    <h3 class="text-3xl font-bold font-heading">STREET <span class="text-red-600">LEGENDS</span></h3>
-                    <div class="video-container aspect-video w-full overflow-hidden">
-                         <iframe class="w-full h-full" src="vid1.mp4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <p class="text-gray-400 leading-relaxed">
-                        From the track to the city nights, CYCLISTE offers the ultimate street-legal performance. Watch how our riders dominate every corner.
-                    </p>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-sm text-gray-400">1.8M Views</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-sm text-gray-400">4:28</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Video 3 -->
-                <div class="space-y-6" data-aos="fade-right">
-                    <h3 class="text-3xl font-bold font-heading">TRACK <span class="text-red-600">DOMINATION</span></h3>
-                    <div class="video-container aspect-video w-full overflow-hidden">
-                        <iframe class="w-full h-full" src="vid3.mp4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <p class="text-gray-400 leading-relaxed">
-                        Watch our superbikes push the limits on the world's most challenging circuits. Pure speed, pure adrenaline.
-                    </p>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-sm text-gray-400">3.2M Views</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-sm text-gray-400">6:15</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Video 4 -->
-                <div class="space-y-6 lg:mt-20" data-aos="fade-left">
-                    <h3 class="text-3xl font-bold font-heading">CUSTOM <span class="text-red-600">BUILDS</span></h3>
-                    <div class="video-container aspect-video w-full overflow-hidden">
-                        <iframe class="w-full h-full" src="vid4.mp4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <p class="text-gray-400 leading-relaxed">
-                        See how we transform already incredible machines into personalized masterpieces. Your dream bike, your way.
-                    </p>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-sm text-gray-400">1.5M Views</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-sm text-gray-400">8:33</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="py-32 px-6 md:px-10 bg-black">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                <div data-aos="fade-right">
-                    <h2 class="text-4xl md:text-6xl font-black font-heading mb-8">
-                        ABOUT <span class="text-red-600">CYCLISTE</span>
-                    </h2>
-                    <p class="text-gray-300 text-lg leading-relaxed mb-6">
-                        Since 2010, CYCLISTE has been the premier destination for elite superbike enthusiasts. We don't just sell motorcycles—we deliver dreams, adrenaline, and the ultimate riding experience.
-                    </p>
-                    <p class="text-gray-400 leading-relaxed mb-8">
-                        Our curated collection features only the world's most exceptional machines, from Italian masterpieces to German engineering marvels. Every bike is hand-selected, meticulously inspected, and backed by our legendary customer service.
-                    </p>
-                    <div class="space-y-4">
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-red-600 p-2 mt-1">
-                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="text-white font-bold mb-1">Authenticity Guaranteed</h4>
-                                <p class="text-gray-400 text-sm">Every bike comes with full documentation and warranty</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-red-600 p-2 mt-1">
-                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="text-white font-bold mb-1">Expert Consultation</h4>
-                                <p class="text-gray-400 text-sm">Our team of specialists help you find your perfect match</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start space-x-4">
-                            <div class="bg-red-600 p-2 mt-1">
-                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="text-white font-bold mb-1">Lifetime Support</h4>
-                                <p class="text-gray-400 text-sm">Premium maintenance and customization services</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="relative" data-aos="fade-left">
-                    <div class="relative z-10">
-                        <img src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=2070&auto=format&fit=crop" alt="About CYCLISTE" class="w-full rounded-sm">
-                    </div>
-                    <div class="absolute -bottom-10 -right-10 w-full h-full border-2 border-red-600/30"></div>
-                </div>
-            </div>
-
-            <!-- Mission Statement -->
-            <div class="mt-32 text-center max-w-4xl mx-auto" data-aos="zoom-in">
-                <div class="border-t border-b border-red-600/30 py-12">
-                    <p class="text-2xl md:text-3xl font-light italic text-gray-300 leading-relaxed">
-                        "We believe that riding isn't just transportation—it's a lifestyle, a passion, an art form. Every machine we offer is chosen to ignite that fire within you."
-                    </p>
-                    <p class="text-red-600 font-bold mt-6 uppercase tracking-[0.2em] text-sm">
-                        — Marcus Chen, Founder & CEO
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="py-32 px-6 md:px-10 bg-gradient-to-b from-black to-zinc-950">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-16" data-aos="fade-down">
-                <h2 class="text-4xl md:text-6xl font-black font-heading mb-4">
-                    GET IN <span class="text-red-600">TOUCH</span>
-                </h2>
-                <p class="text-gray-400 max-w-2xl mx-auto">
-                    Ready to own your dream machine? Contact us today and let's make it happen.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
-                <!-- Contact Form -->
-                <div data-aos="fade-right">
-                    <form class="space-y-6" id="contact-form">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <label class="block text-sm font-bold uppercase tracking-wider mb-2 text-gray-400">First Name</label>
-                                <input type="text" class="form-input w-full px-4 py-3 text-white" placeholder="John">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold uppercase tracking-wider mb-2 text-gray-400">Last Name</label>
-                                <input type="text" class="form-input w-full px-4 py-3 text-white" placeholder="Rider">
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-bold uppercase tracking-wider mb-2 text-gray-400">Email</label>
-                            <input type="email" class="form-input w-full px-4 py-3 text-white" placeholder="john@example.com">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-bold uppercase tracking-wider mb-2 text-gray-400">Phone</label>
-                            <input type="tel" class="form-input w-full px-4 py-3 text-white" placeholder="+1 (555) 000-0000">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-bold uppercase tracking-wider mb-2 text-gray-400">Interested In</label>
-                            <select class="form-input w-full px-4 py-3 text-white">
-                                <option>Select a category</option>
-                                <option>Supercycle</option>
-                                <option>Hyperbike</option>
-                                <option>German Beast</option>
-                                <option>Custom Build</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-bold uppercase tracking-wider mb-2 text-gray-400">Message</label>
-                            <textarea class="form-input w-full px-4 py-3 text-white h-32" placeholder="Tell us about your dream bike..."></textarea>
-                        </div>
-                        
-                        <button type="submit" class="btn-primary w-full bg-red-600 text-white py-4 font-bold uppercase tracking-[0.15em] hover:bg-red-700 transition-all duration-300">
-                            Send Message
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Contact Info -->
-                <div class="space-y-8" data-aos="fade-left">
-                    <div>
-                        <h3 class="text-2xl font-bold font-heading mb-6">VISIT OUR <span class="text-red-600">SHOWROOM</span></h3>
-                        <div class="space-y-4">
-                            <div class="flex items-start space-x-4">
-                                <div class="bg-red-600 p-3 mt-1">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-bold mb-1">Address</h4>
-                                    <p class="text-gray-400">123 Speed Avenue, Motorcycle District<br>Los Angeles, CA 90001, USA</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start space-x-4">
-                                <div class="bg-red-600 p-3 mt-1">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-bold mb-1">Phone</h4>
-                                    <p class="text-gray-400">+1 (555) 123-4567<br>+1 (555) 987-6543</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start space-x-4">
-                                <div class="bg-red-600 p-3 mt-1">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-bold mb-1">Email</h4>
-                                    <p class="text-gray-400">info@cycliste.com<br>sales@cycliste.com</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start space-x-4">
-                                <div class="bg-red-600 p-3 mt-1">
-                                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="text-white font-bold mb-1">Hours</h4>
-                                    <p class="text-gray-400">Monday - Friday: 9:00 AM - 8:00 PM<br>Saturday: 10:00 AM - 6:00 PM<br>Sunday: Closed</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Map -->
-                    <div class="h-64 bg-zinc-900 border border-white/10 overflow-hidden">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3305.7294!2d-118.2436!3d34.0522!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDAzJzA4LjAiTiAxMTjCsDE0JzM3LjAiVw!5e0!3m2!1sen!2sus!4v1234567890" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="py-20 px-6 md:px-10 border-t border-white/5 bg-black">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-                <!-- Brand -->
-                <div class="md:col-span-2">
-                    <div class="text-4xl font-black font-heading mb-6">
-                        CYCLISTE<span class="text-red-600">.</span>
-                    </div>
-                    <p class="text-gray-400 mb-6 leading-relaxed">
-                        The ultimate destination for elite superbike enthusiasts. Experience the thrill, own the power.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="bg-zinc-900 hover:bg-red-600 p-3 transition-all duration-300">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                            </svg>
-                        </a>
-                        <a href="#" class="bg-zinc-900 hover:bg-red-600 p-3 transition-all duration-300">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                            </svg>
-                        </a>
-                        <a href="#" class="bg-zinc-900 hover:bg-red-600 p-3 transition-all duration-300">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
-                            </svg>
-                        </a>
-                        <a href="#" class="bg-zinc-900 hover:bg-red-600 p-3 transition-all duration-300">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Quick Links -->
-                <div>
-                    <h4 class="text-white font-bold uppercase tracking-[0.15em] mb-6 text-sm">Quick Links</h4>
-                    <ul class="space-y-3 text-gray-400 text-sm">
-                        <li><a href="#home" class="hover:text-red-600 transition">Home</a></li>
-                        <li><a href="#categories" class="hover:text-red-600 transition">Categories</a></li>
-                        <li><a href="#about" class="hover:text-red-600 transition">About Us</a></li>
-                        <li><a href="#contact" class="hover:text-red-600 transition">Contact</a></li>
-                        <li><a href="#" class="hover:text-red-600 transition">Gallery</a></li>
-                        <li><a href="#" class="hover:text-red-600 transition">News</a></li>
-                    </ul>
-                </div>
-
-                <!-- Services -->
-                <div>
-                    <h4 class="text-white font-bold uppercase tracking-[0.15em] mb-6 text-sm">Services</h4>
-                    <ul class="space-y-3 text-gray-400 text-sm">
-                        <li><a href="#" class="hover:text-red-600 transition">Bike Sales</a></li>
-                        <li><a href="#" class="hover:text-red-600 transition">Custom Builds</a></li>
-                        <li><a href="#" class="hover:text-red-600 transition">Maintenance</a></li>
-                        <li><a href="#" class="hover:text-red-600 transition">Financing</a></li>
-                        <li><a href="#" class="hover:text-red-600 transition">Trade-ins</a></li>
-                        <li><a href="#" class="hover:text-red-600 transition">Shipping</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Bottom Bar -->
-            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-gray-500 text-xs">
-                <p>&copy; 2026 CYCLISTE Elite Motors. All rights reserved. No limits, no compromises.</p>
-                <div class="flex space-x-6 mt-4 md:mt-0">
-                    <a href="#" class="hover:text-white transition">Privacy Policy</a>
-                    <a href="#" class="hover:text-white transition">Terms of Service</a>
-                    <a href="#" class="hover:text-white transition">Cookie Policy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Back to Top Button -->
-    <button id="back-to-top" class="fixed bottom-8 right-8 bg-red-600 hover:bg-red-700 text-white p-4 shadow-lg transition-all duration-300 opacity-0 invisible z-40">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-        </svg>
-    </button>
-
-    <!-- External Scripts -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script src="script.js"></script>
+    // ── CONTACT FORM ──
+    document.getElementById('contact-form').addEventListener('submit', e => {
+        e.preventDefault();
+        document.getElementById('form-success').classList.add('show');
+        e.target.reset();
+        setTimeout(() => document.getElementById('form-success').classList.remove('show'), 4000);
+    });
+</script>
 </body>
 </html>
